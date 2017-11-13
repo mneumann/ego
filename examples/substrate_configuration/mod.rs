@@ -1,6 +1,6 @@
 use ego::domain_graph::{Neuron, NodeCount};
 use ego::substrate::{NodeSet, Substrate, SubstrateConfiguration, Position3d};
-use ego::distribute::DistributeInterval;
+use ego::placement::DistributeInterval;
 
 pub fn substrate_configuration(
     node_count: &NodeCount,

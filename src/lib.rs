@@ -23,7 +23,6 @@ pub mod behavioral_bitvec;
 pub mod graph;
 pub mod network_builder;
 pub mod domain_graph;
-pub mod distribute;
 pub mod placement;
 pub mod export;
 pub mod fitness_graphsimilarity;

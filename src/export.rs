@@ -89,7 +89,7 @@ node [fontname = Helvetica];
                     7 => "t",
                     8 => "ex",
                     9 => "w",
-                    10 => "r", 
+                    10 => "r",
                     _ => panic!(),
                 };
                 format!(
