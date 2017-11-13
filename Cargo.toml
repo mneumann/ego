@@ -1,0 +1,26 @@
+[package]
+name = "ego"
+version = "0.0.1"
+authors = ["Michael Neumann <mneumann@ntecs.de>"]
+license = "MIT"
+repository = "https://github.com/mneumann/ego"
+description = "Evolutionary Graph Optimizer"
+keywords = ["evolution", "neuro", "net", "algorithm", "cppn"]
+
+include = ["src/*.rs", "examples/*.rs", "examples/*.rs", "Cargo.toml", "LICENSE", "README.md"]
+
+[dependencies]
+
+rand = "0.3"
+rayon = "0.9"
+log = "0.3"
+cppn = "0.1"
+acyclic-network = "0.1"
+graph-neighbor-matching = "0.7"
+nsga2 = {git = "https://github.com/mneumann/nsga2-rs"}
+hamming = "0.1"
+primal-bit = "0.2"
+closed01 = "0.4"
+asexp = "0.3"
+graph-io-gml = "0.2"
+petgraph = "0.4"
