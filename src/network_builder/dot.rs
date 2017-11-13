@@ -1,6 +1,6 @@
-use ::network_builder::NetworkBuilder;
-use ::domain_graph::Neuron;
-use ::substrate::{Position, Node};
+use network_builder::NetworkBuilder;
+use domain_graph::Neuron;
+use substrate::{Position, Node};
 use std::io::Write;
 use std::marker::PhantomData;
 
@@ -31,7 +31,10 @@ impl<'a, W: Write, P: Position> NetworkBuilder for DotNetworkBuilder<'a, W, P> {
     type Output = ();
 
     fn new() -> Self {
-        DotNetworkBuilder { wr: None, _phantom: PhantomData }
+        DotNetworkBuilder {
+            wr: None,
+            _phantom: PhantomData,
+        }
     }
 
     fn add_node(&mut self, node: &Node<Self::POS, Self::NT>, param: f64) {
@@ -41,35 +44,38 @@ impl<'a, W: Write, P: Position> NetworkBuilder for DotNetworkBuilder<'a, W, P> {
             Neuron::Hidden => "",
             Neuron::Output => ",rank=max",
         };
-        writeln!(wr,
-                 "  {}[label={},weight={:.1}{}];",
-                 node.index,
-                 node.index,
-                 param,
-                 rank)
-            .unwrap();
+        writeln!(
+            wr,
+            "  {}[label={},weight={:.1}{}];",
+            node.index,
+            node.index,
+            param,
+            rank
+        ).unwrap();
     }
 
-    fn add_link(&mut self,
-                source_node: &Node<Self::POS, Self::NT>,
-                target_node: &Node<Self::POS, Self::NT>,
-                weight1: f64,
-                _weight2: f64) {
+    fn add_link(
+        &mut self,
+        source_node: &Node<Self::POS, Self::NT>,
+        target_node: &Node<Self::POS, Self::NT>,
+        weight1: f64,
+        _weight2: f64,
+    ) {
         let wr = self.wr.as_mut().unwrap();
         let color = if weight1 >= 0.0 { "black" } else { "red" };
         let w = weight1.abs();
         // debug_assert!(w <= 1.0);
-        writeln!(wr,
-                 "  {} -> {} [weight={:.2},color={}];",
-                 source_node.index,
-                 target_node.index,
-                 w,
-                 color)
-            .unwrap();
+        writeln!(
+            wr,
+            "  {} -> {} [weight={:.2},color={}];",
+            source_node.index,
+            target_node.index,
+            w,
+            color
+        ).unwrap();
     }
 
     fn network(self) -> Self::Output {
         ()
     }
 }
-

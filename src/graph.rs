@@ -1,4 +1,4 @@
-use graph_neighbor_matching::graph::{OwnedGraph};
+use graph_neighbor_matching::graph::OwnedGraph;
 use std::fs::File;
 use std::io::Read;
 use std::str::FromStr;
@@ -53,7 +53,8 @@ fn normalize_to_closed01(w: f32, range: (f32, f32)) -> Closed01<f32> {
 }
 
 pub fn load_graph_normalized<N>(graph_file: &str) -> OwnedGraph<N>
-    where N: Clone + Debug + FromStr<Err = &'static str>
+where
+    N: Clone + Debug + FromStr<Err = &'static str>,
 {
     let graph_s = {
         let mut graph_file = File::open(graph_file).unwrap();
@@ -62,15 +63,17 @@ pub fn load_graph_normalized<N>(graph_file: &str) -> OwnedGraph<N>
         graph_s
     };
 
-    let graph = parse_gml(&graph_s,
-                          &|node_sexp| -> Option<N> {
-                              node_sexp.and_then(|se| se.get_str().map(|s| N::from_str(s).unwrap()))
-                          },
-                          &convert_weight)
-                    .unwrap();
+    let graph = parse_gml(
+        &graph_s,
+        &|node_sexp| -> Option<N> {
+            node_sexp.and_then(|se| se.get_str().map(|s| N::from_str(s).unwrap()))
+        },
+        &convert_weight,
+    ).unwrap();
     let edge_range = determine_edge_value_range(&graph);
-    let graph = graph.map(|_, nw| nw.clone(),
-                          |_, &ew| normalize_to_closed01(ew, edge_range));
+    let graph = graph.map(|_, nw| nw.clone(), |_, &ew| {
+        normalize_to_closed01(ew, edge_range)
+    });
 
     OwnedGraph::from_petgraph(&graph)
 }

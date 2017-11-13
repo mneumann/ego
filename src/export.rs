@@ -1,48 +1,54 @@
-use ::domain_graph::Neuron;
-use ::substrate::{SubstrateConfiguration, Position};
-use ::cppn::{CppnNodeKind, Expression, G, ActivationFunction};
-use ::network_builder::NetworkBuilder;
-use ::network_builder::gml::GMLNetworkBuilder;
-use ::network_builder::dot::DotNetworkBuilder;
+use domain_graph::Neuron;
+use substrate::{SubstrateConfiguration, Position};
+use cppn::{CppnNodeKind, Expression, G, ActivationFunction};
+use network_builder::NetworkBuilder;
+use network_builder::gml::GMLNetworkBuilder;
+use network_builder::dot::DotNetworkBuilder;
 
 use std::io::Write;
 use std::fs::File;
 
-pub fn write_net_gml<P>(filename: &str,
-                expression: &Expression,
-                genome: &G,
-                substrate_config: &SubstrateConfiguration<P, Neuron>)
-    where P: Position
+pub fn write_net_gml<P>(
+    filename: &str,
+    expression: &Expression,
+    genome: &G,
+    substrate_config: &SubstrateConfiguration<P, Neuron>,
+) where
+    P: Position,
 {
     let mut file = File::create(filename).unwrap();
     let mut network_builder = GMLNetworkBuilder::new();
     network_builder.set_writer(&mut file);
     network_builder.begin();
-    let (_behavior, _connection_cost, _) = expression.express(genome, &mut network_builder, substrate_config);
+    let (_behavior, _connection_cost, _) =
+        expression.express(genome, &mut network_builder, substrate_config);
     network_builder.end();
 }
 
-pub fn write_net_dot<P>(filename: &str,
-                expression: &Expression,
-                genome: &G,
-                substrate_config: &SubstrateConfiguration<P, Neuron>)
-    where P: Position
+pub fn write_net_dot<P>(
+    filename: &str,
+    expression: &Expression,
+    genome: &G,
+    substrate_config: &SubstrateConfiguration<P, Neuron>,
+) where
+    P: Position,
 {
     let mut file = File::create(filename).unwrap();
     let mut network_builder = DotNetworkBuilder::new();
     network_builder.set_writer(&mut file);
     network_builder.begin();
-    let (_behavior, _connection_cost, _) = expression.express(genome, &mut network_builder, substrate_config);
+    let (_behavior, _connection_cost, _) =
+        expression.express(genome, &mut network_builder, substrate_config);
     network_builder.end();
 }
 
-pub fn write_cppn_dot(filename: &str, genome: &G)
-{
+pub fn write_cppn_dot(filename: &str, genome: &G) {
     let mut file = File::create(filename).unwrap();
     let network = genome.network();
 
-    writeln!(&mut file,
-             "digraph {{
+    writeln!(
+        &mut file,
+        "digraph {{
 graph [
   layout=neato,
   rankdir = \"TB\",
@@ -55,8 +61,8 @@ graph [
   splines = \"polyline\",
 ];
 node [fontname = Helvetica];
-")
-        .unwrap();
+"
+    ).unwrap();
 
     network.each_node_with_index(|node, node_idx| {
         let s = match node.node_type().kind {
@@ -72,8 +78,7 @@ node [fontname = Helvetica];
                 };
 
                 // XXX label
-                format!("shape=egg,label={},rank=min,style=filled,color=grey",
-                        label)
+                format!("shape=egg,label={},rank=min,style=filled,color=grey", label)
             }
             CppnNodeKind::Bias => {
                 assert!(node_idx.index() == 6);
@@ -87,13 +92,17 @@ node [fontname = Helvetica];
                     10 => "r", 
                     _ => panic!(),
                 };
-                format!("shape=doublecircle,label={},rank=max,style=filled,\
+                format!(
+                    "shape=doublecircle,label={},rank=max,style=filled,\
                                              fillcolor=yellow,color=grey",
-                                             label)
+                    label
+                )
             }
             CppnNodeKind::Hidden => {
-                format!("shape=box,label={}",
-                        node.node_type().activation_function.name())
+                format!(
+                    "shape=box,label={}",
+                    node.node_type().activation_function.name()
+                )
             }
         };
         writeln!(&mut file, "{} [{}];", node_idx.index(), s).unwrap();
@@ -101,12 +110,13 @@ node [fontname = Helvetica];
     network.each_link_ref(|link_ref| {
         let w = link_ref.link().weight().0;
         let color = if w >= 0.0 { "black" } else { "red" };
-        writeln!(&mut file,
-                 "{} -> {} [color={}];",
-                 link_ref.link().source_node_index().index(),
-                 link_ref.link().target_node_index().index(),
-                 color)
-            .unwrap();
+        writeln!(
+            &mut file,
+            "{} -> {} [color={}];",
+            link_ref.link().source_node_index().index(),
+            link_ref.link().target_node_index().index(),
+            color
+        ).unwrap();
     });
 
     writeln!(&mut file, "}}").unwrap();

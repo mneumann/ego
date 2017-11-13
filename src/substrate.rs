@@ -2,7 +2,7 @@ pub use cppn_ext::position::{Position, Position3d, Position2d};
 
 /// Represents a logical node set. Each node set is represented by a bit,
 /// up to 64 node sets are supported. A node can be part of up to 64
-/// different node sets. The possible connections are based on this information. 
+/// different node sets. The possible connections are based on this information.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct NodeSet(u64);
 
@@ -23,19 +23,38 @@ fn test_nodeset() {
     assert_eq!(2, NodeSet::single(1).0);
     assert_eq!(4, NodeSet::single(2).0);
     assert_eq!(8, NodeSet::single(3).0);
-    assert_eq!(true, NodeSet::single(0).has_intersection(&NodeSet::single(0)));
-    assert_eq!(false, NodeSet::single(0).has_intersection(&NodeSet::single(1)));
-    assert_eq!(false, NodeSet::single(0).has_intersection(&NodeSet::single(2)));
-    assert_eq!(true, NodeSet::single(1).has_intersection(&NodeSet::single(1)));
-    assert_eq!(false, NodeSet::single(1).has_intersection(&NodeSet::single(0)));
-    assert_eq!(false, NodeSet::single(1).has_intersection(&NodeSet::single(2)));
+    assert_eq!(
+        true,
+        NodeSet::single(0).has_intersection(&NodeSet::single(0))
+    );
+    assert_eq!(
+        false,
+        NodeSet::single(0).has_intersection(&NodeSet::single(1))
+    );
+    assert_eq!(
+        false,
+        NodeSet::single(0).has_intersection(&NodeSet::single(2))
+    );
+    assert_eq!(
+        true,
+        NodeSet::single(1).has_intersection(&NodeSet::single(1))
+    );
+    assert_eq!(
+        false,
+        NodeSet::single(1).has_intersection(&NodeSet::single(0))
+    );
+    assert_eq!(
+        false,
+        NodeSet::single(1).has_intersection(&NodeSet::single(2))
+    );
 }
 
 
 /// Represents a node in the substrate. `T` stores additional information about that node.
 #[derive(Clone, Debug)]
 pub struct Node<P, T>
-    where P: Position
+where
+    P: Position,
 {
     pub index: usize,
     pub position: P,
@@ -43,7 +62,9 @@ pub struct Node<P, T>
     pub node_set: NodeSet,
 }
 
-impl<P, T> Node<P, T> where P: Position
+impl<P, T> Node<P, T>
+where
+    P: Position,
 {
     fn in_nodeset(&self, node_set: &NodeSet) -> bool {
         self.node_set.has_intersection(node_set)
@@ -52,12 +73,15 @@ impl<P, T> Node<P, T> where P: Position
 
 #[derive(Clone, Debug)]
 pub struct Substrate<P, T>
-    where P: Position
+where
+    P: Position,
 {
     nodes: Vec<Node<P, T>>,
 }
 
-impl<P, T> Substrate<P, T> where P: Position
+impl<P, T> Substrate<P, T>
+where
+    P: Position,
 {
     pub fn new() -> Self {
         Substrate { nodes: Vec::new() }
@@ -79,7 +103,10 @@ impl<P, T> Substrate<P, T> where P: Position
 
     /// Determines all possible node pairs.
 
-    pub fn to_configuration(self, connect_node_sets: &[(NodeSet, NodeSet)]) -> SubstrateConfiguration<P, T> {
+    pub fn to_configuration(
+        self,
+        connect_node_sets: &[(NodeSet, NodeSet)],
+    ) -> SubstrateConfiguration<P, T> {
         let mut pairs = Vec::new();
 
         // Connect all nodes belonging to NodeSet `src_ns` with those that belong to `tgt_ns`.
@@ -111,7 +138,8 @@ impl<P, T> Substrate<P, T> where P: Position
 
 #[derive(Clone, Debug)]
 pub struct SubstrateConfiguration<P, T>
-    where P: Position,
+where
+    P: Position,
 {
     nodes: Vec<Node<P, T>>,
     links: Vec<(usize, usize)>,
@@ -119,7 +147,8 @@ pub struct SubstrateConfiguration<P, T>
 }
 
 impl<P, T> SubstrateConfiguration<P, T>
-    where P: Position
+where
+    P: Position,
 {
     pub fn nodes(&self) -> &[Node<P, T>] {
         &self.nodes

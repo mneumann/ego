@@ -14,7 +14,7 @@ pub struct Genome<NT: NodeType> {
     /// `protected_nodes` in `network`.
     protected_nodes: usize,
 
-    /// Birth iteration 
+    /// Birth iteration
     birth_iteration: usize,
 }
 
@@ -81,7 +81,12 @@ impl<NT: NodeType> Genome<NT> {
         debug_assert!(!self.network.link_would_cycle(source_node, target_node));
         debug_assert!(self.network.valid_link(source_node, target_node).is_ok());
 
-        let _link_index = self.network.add_link_unordered(source_node, target_node, weight, ());
+        let _link_index = self.network.add_link_unordered(
+            source_node,
+            target_node,
+            weight,
+            (),
+        );
     }
 
     pub fn add_node(&mut self, node_type: NT) -> NodeIndex {
@@ -92,12 +97,14 @@ impl<NT: NodeType> Genome<NT> {
         self.network.node_count()
     }
 
-    fn random_mindeg_node<R>(&self,
-                             tournament_k: usize,
-                             start_from: usize,
-                             rng: &mut R)
-                             -> NodeIndex
-        where R: Rng
+    fn random_mindeg_node<R>(
+        &self,
+        tournament_k: usize,
+        start_from: usize,
+        rng: &mut R,
+    ) -> NodeIndex
+    where
+        R: Rng,
     {
         assert!(tournament_k > 0);
 
@@ -117,7 +124,8 @@ impl<NT: NodeType> Genome<NT> {
     }
 
     fn random_unprotected_node<R>(&self, tournament_k: usize, rng: &mut R) -> Option<NodeIndex>
-        where R: Rng
+    where
+        R: Rng,
     {
         assert!(tournament_k > 0);
 
@@ -125,7 +133,11 @@ impl<NT: NodeType> Genome<NT> {
         if n <= self.protected_nodes {
             return None;
         }
-        Some(self.random_mindeg_node(tournament_k, self.protected_nodes, rng))
+        Some(self.random_mindeg_node(
+            tournament_k,
+            self.protected_nodes,
+            rng,
+        ))
     }
 
     /// Structural Mutation `AddNode`.
@@ -135,12 +147,14 @@ impl<NT: NodeType> Genome<NT> {
     /// Note that the new `node_type` should allow incoming and outgoing links! Otherwise
     /// this panics!
 
-    pub fn mutate_add_node<R>(&mut self,
-                              node_type: NT,
-                              second_link_weight: Option<Weight>,
-                              rng: &mut R)
-                              -> bool
-        where R: Rng
+    pub fn mutate_add_node<R>(
+        &mut self,
+        node_type: NT,
+        second_link_weight: Option<Weight>,
+        rng: &mut R,
+    ) -> bool
+    where
+        R: Rng,
     {
         let link_index = match self.network.random_link_index(rng) {
             Some(idx) => idx,
@@ -149,9 +163,11 @@ impl<NT: NodeType> Genome<NT> {
 
         let (orig_source_node, orig_target_node, orig_weight) = {
             let link = self.network.link(link_index);
-            (link.source_node_index(),
-             link.target_node_index(),
-             link.weight())
+            (
+                link.source_node_index(),
+                link.target_node_index(),
+                link.weight(),
+            )
         };
 
         // remove original link
@@ -168,9 +184,11 @@ impl<NT: NodeType> Genome<NT> {
         // to the network (CPPN) as little as possible.
 
         self.add_link(orig_source_node, middle_node, orig_weight);
-        self.add_link(middle_node,
-                      orig_target_node,
-                      second_link_weight.unwrap_or(orig_weight));
+        self.add_link(
+            middle_node,
+            orig_target_node,
+            second_link_weight.unwrap_or(orig_weight),
+        );
 
         return true;
     }
@@ -183,7 +201,8 @@ impl<NT: NodeType> Genome<NT> {
     /// We choose `tournament_k` random nodes and remove the one with the smallest degree.
 
     pub fn mutate_drop_node<R>(&mut self, tournament_k: usize, rng: &mut R) -> bool
-        where R: Rng
+    where
+        R: Rng,
     {
         match self.random_unprotected_node(tournament_k, rng) {
             None => false,
@@ -201,12 +220,14 @@ impl<NT: NodeType> Genome<NT> {
     ///
     /// We choose from `tournament_k` nodes the one with the smallest degree.
 
-    pub fn mutate_modify_node<R>(&mut self,
-                                 new_node_type: NT,
-                                 tournament_k: usize,
-                                 rng: &mut R)
-                                 -> bool
-        where R: Rng
+    pub fn mutate_modify_node<R>(
+        &mut self,
+        new_node_type: NT,
+        tournament_k: usize,
+        rng: &mut R,
+    ) -> bool
+    where
+        R: Rng,
     {
         if let Some(node_idx) = self.random_unprotected_node(tournament_k, rng) {
             if self.network.node(node_idx).node_type() != &new_node_type {
@@ -224,7 +245,8 @@ impl<NT: NodeType> Genome<NT> {
     /// Return `true` if the genome was modified. Otherwise `false`.
 
     pub fn mutate_connect<R>(&mut self, link_weight: Weight, rng: &mut R) -> bool
-        where R: Rng
+    where
+        R: Rng,
     {
         match self.network.find_random_unconnected_link_no_cycle(rng) {
             Some((source_node, target_node)) => {
@@ -246,7 +268,8 @@ impl<NT: NodeType> Genome<NT> {
     /// Return `true` if the genome was modified. Otherwise `false`.
 
     pub fn mutate_symmetric_join<R>(&mut self, rng: &mut R) -> bool
-        where R: Rng
+    where
+        R: Rng,
     {
         let link_index = match self.network.random_link_index(rng) {
             Some(idx) => idx,
@@ -255,17 +278,20 @@ impl<NT: NodeType> Genome<NT> {
 
         let (source_node, target_node, weight) = {
             let link = self.network.link(link_index);
-            (link.source_node_index(),
-             link.target_node_index(),
-             link.weight())
+            (
+                link.source_node_index(),
+                link.target_node_index(),
+                link.weight(),
+            )
         };
 
         for i in 0..self.network.node_count() {
             let node_idx = NodeIndex::new(i);
             if node_idx != source_node && node_idx != target_node {
                 if self.network.valid_link(node_idx, target_node).is_ok() &&
-                   !self.network.has_link(node_idx, target_node) &&
-                   !self.network.link_would_cycle(node_idx, target_node) {
+                    !self.network.has_link(node_idx, target_node) &&
+                    !self.network.link_would_cycle(node_idx, target_node)
+                {
                     self.add_link(node_idx, target_node, weight.inv());
                     return true;
                 }
@@ -283,7 +309,8 @@ impl<NT: NodeType> Genome<NT> {
     /// Return `true` if the genome was modified. Otherwise `false`.
 
     pub fn mutate_symmetric_fork<R>(&mut self, rng: &mut R) -> bool
-        where R: Rng
+    where
+        R: Rng,
     {
         let link_index = match self.network.random_link_index(rng) {
             Some(idx) => idx,
@@ -292,17 +319,20 @@ impl<NT: NodeType> Genome<NT> {
 
         let (source_node, target_node, weight) = {
             let link = self.network.link(link_index);
-            (link.source_node_index(),
-             link.target_node_index(),
-             link.weight())
+            (
+                link.source_node_index(),
+                link.target_node_index(),
+                link.weight(),
+            )
         };
 
         for i in 0..self.network.node_count() {
             let node_idx = NodeIndex::new(i);
             if node_idx != source_node && node_idx != target_node {
                 if self.network.valid_link(source_node, node_idx).is_ok() &&
-                   !self.network.has_link(source_node, node_idx) &&
-                   !self.network.link_would_cycle(source_node, node_idx) {
+                    !self.network.has_link(source_node, node_idx) &&
+                    !self.network.link_would_cycle(source_node, node_idx)
+                {
                     self.add_link(source_node, node_idx, weight.inv());
                     return true;
                 }
@@ -320,12 +350,14 @@ impl<NT: NodeType> Genome<NT> {
     ///
     /// Return `true` if the genome was modified. Otherwise `false`.
 
-    pub fn mutate_symmetric_connect<R>(&mut self,
-                                       link_weight: Weight,
-                                       retries: usize,
-                                       rng: &mut R)
-                                       -> bool
-        where R: Rng
+    pub fn mutate_symmetric_connect<R>(
+        &mut self,
+        link_weight: Weight,
+        retries: usize,
+        rng: &mut R,
+    ) -> bool
+    where
+        R: Rng,
     {
         match self.network.find_random_unconnected_link_no_cycle(rng) {
             Some((node1, node2)) => {
@@ -336,11 +368,12 @@ impl<NT: NodeType> Genome<NT> {
                 for _ in 0..retries {
                     let node3 = self.random_mindeg_node(3, 0, rng);
                     if self.network.valid_link(node1, node3).is_ok() &&
-                       self.network.valid_link(node2, node3).is_ok() &&
-                       !self.network.has_link(node1, node3) &&
-                       !self.network.has_link(node2, node3) &&
-                       !self.network.link_would_cycle(node1, node3) &&
-                       !self.network.link_would_cycle(node2, node3) {
+                        self.network.valid_link(node2, node3).is_ok() &&
+                        !self.network.has_link(node1, node3) &&
+                        !self.network.has_link(node2, node3) &&
+                        !self.network.link_would_cycle(node1, node3) &&
+                        !self.network.link_would_cycle(node2, node3)
+                    {
                         self.add_link(node1, node3, link_weight);
                         self.add_link(node2, node3, link_weight.inv());
                         return true;
@@ -360,7 +393,8 @@ impl<NT: NodeType> Genome<NT> {
     /// Return `true` if the genome was modified. Otherwise `false`.
 
     pub fn mutate_disconnect<R>(&mut self, rng: &mut R) -> bool
-        where R: Rng
+    where
+        R: Rng,
     {
         match self.network.random_link_index(rng) {
             Some(idx) => {
@@ -377,23 +411,25 @@ impl<NT: NodeType> Genome<NT> {
     ///
     /// Returns the number of modifications (if negative, indicates that we used a random link).
 
-    pub fn mutate_weights<R>(&mut self,
-                             mutate_element_prob: Prob,
-                             weight_perturbance: &WeightPerturbanceMethod,
-                             link_weight_range: &WeightRange,
-                             rng: &mut R)
-                             -> isize
-        where R: Rng
+    pub fn mutate_weights<R>(
+        &mut self,
+        mutate_element_prob: Prob,
+        weight_perturbance: &WeightPerturbanceMethod,
+        link_weight_range: &WeightRange,
+        rng: &mut R,
+    ) -> isize
+    where
+        R: Rng,
     {
         let mut modifications = 0;
 
-        self.network.each_link_mut(|link| {
-            if mutate_element_prob.flip(rng) {
+        self.network.each_link_mut(
+            |link| if mutate_element_prob.flip(rng) {
                 let new_weight = weight_perturbance.perturb(link.weight(), link_weight_range, rng);
                 link.set_weight(new_weight);
                 modifications += 1;
-            }
-        });
+            },
+        );
 
         if modifications == 0 {
             // Make at least one change to a randomly selected link.
@@ -409,7 +445,8 @@ impl<NT: NodeType> Genome<NT> {
     }
 
     pub fn crossover_weights<R>(&mut self, _partner: &Self, _rng: &mut R) -> isize
-        where R: Rng
+    where
+        R: Rng,
     {
         unimplemented!()
     }

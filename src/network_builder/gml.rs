@@ -1,6 +1,6 @@
-use ::network_builder::NetworkBuilder;
-use ::domain_graph::Neuron;
-use ::substrate::{Position, Node};
+use network_builder::NetworkBuilder;
+use domain_graph::Neuron;
+use substrate::{Position, Node};
 use std::io::Write;
 use std::marker::PhantomData;
 
@@ -30,7 +30,10 @@ impl<'a, W: Write, P: Position> NetworkBuilder for GMLNetworkBuilder<'a, W, P> {
     type Output = ();
 
     fn new() -> Self {
-        GMLNetworkBuilder { wr: None, _phantom: PhantomData }
+        GMLNetworkBuilder {
+            wr: None,
+            _phantom: PhantomData,
+        }
     }
 
     fn add_node(&mut self, node: &Node<Self::POS, Self::NT>, _param: f64) {
@@ -38,25 +41,26 @@ impl<'a, W: Write, P: Position> NetworkBuilder for GMLNetworkBuilder<'a, W, P> {
         writeln!(wr, "  node [id {} weight {:.1}]", node.index, 0.0).unwrap();
     }
 
-    fn add_link(&mut self,
-                source_node: &Node<Self::POS, Self::NT>,
-                target_node: &Node<Self::POS, Self::NT>,
-                weight1: f64,
-                _weight2: f64) {
+    fn add_link(
+        &mut self,
+        source_node: &Node<Self::POS, Self::NT>,
+        target_node: &Node<Self::POS, Self::NT>,
+        weight1: f64,
+        _weight2: f64,
+    ) {
         let wr = self.wr.as_mut().unwrap();
         let w = weight1.abs();
         debug_assert!(w <= 1.0);
-        writeln!(wr,
-                 "  edge [source {} target {} weight {:.1}]",
-                 source_node.index,
-                 target_node.index,
-                 w)
-            .unwrap();
+        writeln!(
+            wr,
+            "  edge [source {} target {} weight {:.1}]",
+            source_node.index,
+            target_node.index,
+            w
+        ).unwrap();
     }
 
     fn network(self) -> Self::Output {
         ()
     }
 }
-
-

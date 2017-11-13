@@ -1,6 +1,6 @@
-use ::network_builder::NetworkBuilder;
-use ::domain_graph::Neuron;
-use ::substrate::{Position3d, Node};
+use network_builder::NetworkBuilder;
+use domain_graph::Neuron;
+use substrate::{Position3d, Node};
 
 // For vizualizing a network (e.g. converting into a 3d mesh)
 pub struct VizNetworkBuilder<T> {
@@ -13,8 +13,9 @@ pub trait FromRef<T> {
 }
 
 impl<'a, V> NetworkBuilder for VizNetworkBuilder<V>
-where V: FromRef<Node<Position3d, Neuron>> {
-
+where
+    V: FromRef<Node<Position3d, Neuron>>,
+{
     type POS = Position3d;
     type NT = Neuron;
     type Output = ();
@@ -31,11 +32,13 @@ where V: FromRef<Node<Position3d, Neuron>> {
         self.point_list.push(FromRef::from_ref(node));
     }
 
-    fn add_link(&mut self,
-                source_node: &Node<Self::POS, Self::NT>,
-                target_node: &Node<Self::POS, Self::NT>,
-                weight1: f64,
-                _weight2: f64) {
+    fn add_link(
+        &mut self,
+        source_node: &Node<Self::POS, Self::NT>,
+        target_node: &Node<Self::POS, Self::NT>,
+        weight1: f64,
+        _weight2: f64,
+    ) {
         let w = weight1.abs();
         debug_assert!(w <= 1.0);
 
