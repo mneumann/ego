@@ -3,6 +3,10 @@ extern crate nsga2;
 extern crate rand;
 extern crate time;
 
+extern crate toml;
+#[macro_use]
+extern crate serde_derive;
+
 use ego::graph;
 use ego::domain_graph::GraphSimilarity;
 use ego::cppn::{GeometricActivationFunction, RandomGenomeCreator, Reproduction, Expression,
@@ -15,9 +19,17 @@ use nsga2::selection::SelectNSGPMod;
 use nsga2::population::UnratedPopulation;
 use ego::fitness_graphsimilarity::fitness;
 use std::env;
+use std::fs::File;
+use std::io::Read;
 
 mod substrate_configuration;
 
+#[derive(Debug, Deserialize)]
+struct Config {
+    evo: EvoConfig,
+}
+
+#[derive(Debug, Deserialize)]
 struct EvoConfig {
     mu: usize,
     lambda: usize,
@@ -29,8 +41,10 @@ fn main() {
 
     let mut rng = rand::thread_rng();
 
-    let graph_file = env::args().nth(1).unwrap();
-    println!("graph: {}", graph_file);
+    let graph_file = env::args().nth(1).expect("graph file");
+    let config_file = env::args().nth(2).expect("config file");
+    println!("graph file: {}", graph_file);
+    println!("config file: {}", config_file);
 
     let domain_fitness_eval = GraphSimilarity {
         target_graph: graph::load_graph_normalized(&graph_file),
@@ -45,12 +59,13 @@ fn main() {
 
     let substrate_config = substrate_configuration::substrate_configuration(&node_count);
 
-    let evo_config = EvoConfig {
-        mu: 100,
-        lambda: 100,
-        k: 2,
-        objectives: vec![0, 1, 2, 3, 4, 5],
-    };
+    let mut file = File::open(config_file).expect("Unable to open config file");
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).expect(
+        "Unable to read file",
+    );
+
+    let config: Config = toml::from_str(&contents).unwrap();
 
     let selection = SelectNSGPMod { objective_eps: 0.01 };
 
@@ -115,7 +130,7 @@ fn main() {
     // create `generation 0`
     let mut parents = {
         let mut initial = UnratedPopulation::new();
-        for _ in 0..evo_config.mu {
+        for _ in 0..config.evo.mu {
             initial.push(random_genome_creator.create::<_, Position3d>(0, &mut rng));
         }
         let mut rated = initial.rate_in_parallel(&|ind| {
@@ -124,7 +139,7 @@ fn main() {
 
         PopulationFitness.apply(0, &mut rated);
 
-        rated.select(evo_config.mu, &evo_config.objectives, &selection, &mut rng)
+        rated.select(config.evo.mu, &config.evo.objectives, &selection, &mut rng)
     };
 
     let mut best_individual_i = 0;
@@ -150,13 +165,12 @@ fn main() {
             break;
         }
 
-
         let time_before = time::precise_time_ns();
 
         // create next generation
         iteration += 1;
         let offspring =
-            parents.reproduce(&mut rng, evo_config.lambda, evo_config.k, &|rng, p1, p2| {
+            parents.reproduce(&mut rng, config.evo.lambda, config.evo.k, &|rng, p1, p2| {
                 reproduction.mate(rng, p1, p2, iteration)
             });
         let mut next_gen = if global_mutation_rate > 0.0 {
@@ -190,7 +204,7 @@ fn main() {
             parents.merge(rated_offspring)
         };
         PopulationFitness.apply(iteration, &mut next_gen);
-        parents = next_gen.select(evo_config.mu, &evo_config.objectives, &selection, &mut rng);
+        parents = next_gen.select(config.evo.mu, &config.evo.objectives, &selection, &mut rng);
 
 
         best_individual_i = 0;

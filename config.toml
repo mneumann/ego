@@ -1,0 +1,14 @@
+[evo]
+
+# The number of individuals in the population
+mu = 100
+
+# The number of offspring to produce
+lambda = 100
+
+# The tournament selection
+k = 2
+
+# Which objectives to use as fitness
+objectives = [0, 1, 2, 3, 4, 5]
+
