@@ -12,7 +12,6 @@ include = ["src/*.rs", "examples/*.rs", "examples/*.rs", "Cargo.toml", "LICENSE"
 [dependencies]
 
 rand = "0.3"
-rayon = "0.9"
 log = "0.3"
 cppn = "0.1"
 acyclic-network = "0.1"
@@ -24,4 +23,6 @@ closed01 = "0.4"
 asexp = "0.3"
 graph-io-gml = "0.2"
 petgraph = "0.4"
+
+[dev-dependencies]
 time = "0.1"
