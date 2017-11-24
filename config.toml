@@ -12,3 +12,13 @@ k = 2
 # Which objectives to use as fitness
 objectives = [0, 1, 2, 3, 4, 5]
 
+[fitness]
+
+target_graph = "nets/jeffress_2_3_weights.gml"
+edge_score = false
+iters = 50
+eps = 0.01
+
+[selection]
+
+objective_eps = 0.01

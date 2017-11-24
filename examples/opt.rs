@@ -27,6 +27,8 @@ mod substrate_configuration;
 #[derive(Debug, Deserialize)]
 struct Config {
     evo: EvoConfig,
+    fitness: FitnessConfig,
+    selection: SelectionConfig,
 }
 
 #[derive(Debug, Deserialize)]
@@ -37,27 +39,25 @@ struct EvoConfig {
     objectives: Vec<usize>,
 }
 
+#[derive(Debug, Deserialize)]
+struct FitnessConfig {
+    target_graph: String,
+    edge_score: bool,
+    iters: usize,
+    eps: f32,
+}
+
+#[derive(Debug, Deserialize)]
+struct SelectionConfig {
+    objective_eps: f64,
+}
+
 fn main() {
 
     let mut rng = rand::thread_rng();
 
-    let graph_file = env::args().nth(1).expect("graph file");
-    let config_file = env::args().nth(2).expect("config file");
-    println!("graph file: {}", graph_file);
+    let config_file = env::args().nth(1).expect("config file");
     println!("config file: {}", config_file);
-
-    let domain_fitness_eval = GraphSimilarity {
-        target_graph: graph::load_graph_normalized(&graph_file),
-        edge_score: false,
-        iters: 50,
-        eps: 0.01,
-    };
-
-    // XXX
-    let node_count = domain_fitness_eval.target_graph_node_count();
-    println!("{:?}", node_count);
-
-    let substrate_config = substrate_configuration::substrate_configuration(&node_count);
 
     let mut file = File::open(config_file).expect("Unable to open config file");
     let mut contents = String::new();
@@ -67,7 +67,19 @@ fn main() {
 
     let config: Config = toml::from_str(&contents).unwrap();
 
-    let selection = SelectNSGPMod { objective_eps: 0.01 };
+    let domain_fitness_eval = GraphSimilarity {
+        target_graph: graph::load_graph_normalized(&config.fitness.target_graph),
+        edge_score: config.fitness.edge_score,
+        iters: config.fitness.iters,
+        eps: config.fitness.eps,
+    };
+
+    let node_count = domain_fitness_eval.target_graph_node_count();
+    println!("target_graph node_count: {:?}", node_count);
+
+    let substrate_config = substrate_configuration::substrate_configuration(&node_count);
+
+    let selection = SelectNSGPMod { objective_eps: config.selection.objective_eps };
 
     let weight_perturbance_sigma = 0.1;
     let link_weight_range = 1.0;
