@@ -22,3 +22,28 @@ eps = 0.01
 [selection]
 
 objective_eps = 0.01
+
+[reproduction]
+
+global_mutation_rate = 0.0
+global_element_mutation = 0.0
+
+[reproduction.mating_method_weights]
+
+mutate_add_node = 2
+mutate_drop_node = 1
+mutate_modify_node = 0
+mutate_connect = 2
+mutate_disconnect = 2
+mutate_symmetric_join = 2
+mutate_symmetric_fork = 2
+mutate_symmetric_connect = 1
+mutate_weights = 100
+crossover_weights = 0
+
+# initial genome creator
+[creator]
+
+start_connected = false
+start_initial_nodes = 0
+

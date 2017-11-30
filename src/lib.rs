@@ -11,6 +11,8 @@ extern crate graph_io_gml;
 extern crate petgraph;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate serde_derive;
 
 pub mod genome;
 pub mod weight;

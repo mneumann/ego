@@ -23,9 +23,9 @@ closed01 = "0.4"
 asexp = "0.3"
 graph-io-gml = "0.2"
 petgraph = "0.4"
+serde = "1.0"
+serde_derive = "1.0"
 
 [dev-dependencies]
 time = "0.1"
 toml = "0.4"
-serde = "1.0"
-serde_derive = "1.0"

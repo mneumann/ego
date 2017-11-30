@@ -2,7 +2,6 @@ extern crate ego;
 extern crate nsga2;
 extern crate rand;
 extern crate time;
-
 extern crate toml;
 #[macro_use]
 extern crate serde_derive;
@@ -29,21 +28,31 @@ struct Config {
     evo: EvoConfig,
     fitness: FitnessConfig,
     selection: SelectionConfig,
+    reproduction: ReproductionConfig,
+    creator: CreatorConfig,
 }
 
 #[derive(Debug, Deserialize)]
 struct EvoConfig {
+    /// The number of individuals in the population
     mu: usize,
+    /// The number of offspring to create
     lambda: usize,
+    /// The tournament selection size
     k: usize,
+    /// Which objectives to use as fitness
     objectives: Vec<usize>,
 }
 
 #[derive(Debug, Deserialize)]
 struct FitnessConfig {
+    /// Path to the target graph to approximate
     target_graph: String,
+    ///
     edge_score: bool,
+    /// Number of iterations used by the similarity algorithm
     iters: usize,
+    ///
     eps: f32,
 }
 
@@ -52,8 +61,20 @@ struct SelectionConfig {
     objective_eps: f64,
 }
 
-fn main() {
+#[derive(Debug, Deserialize)]
+struct ReproductionConfig {
+    mating_method_weights: MatingMethodWeights,
+    global_mutation_rate: f32,
+    global_element_mutation: f32,
+}
 
+#[derive(Debug, Deserialize)]
+struct CreatorConfig {
+    start_connected: bool,
+    start_initial_nodes: usize,
+}
+
+fn main() {
     let mut rng = rand::thread_rng();
 
     let config_file = env::args().nth(1).expect("config file");
@@ -84,18 +105,8 @@ fn main() {
     let weight_perturbance_sigma = 0.1;
     let link_weight_range = 1.0;
     let reproduction = Reproduction {
-        mating_method_weights: MatingMethodWeights {
-            mutate_add_node: 2,
-            mutate_drop_node: 1,
-            mutate_modify_node: 0,
-            mutate_connect: 2,
-            mutate_disconnect: 2,
-            mutate_symmetric_join: 2,
-            mutate_symmetric_fork: 2,
-            mutate_symmetric_connect: 1,
-            mutate_weights: 100,
-            crossover_weights: 0,
-        },
+        mating_method_weights: config.reproduction.mating_method_weights,
+
         activation_functions: vec![
             GeometricActivationFunction::Linear,
             GeometricActivationFunction::LinearClipped,
@@ -127,16 +138,17 @@ fn main() {
             GeometricActivationFunction::BipolarSigmoid,
             GeometricActivationFunction::Sine,
         ],
-        start_connected: false,
+        start_connected: config.creator.start_connected,
         start_link_weight_range: WeightRange::bipolar(0.1),
         start_symmetry: vec![], // Some(3.0), None, Some(3.0)],
-        start_initial_nodes: 0,
+        start_initial_nodes: config.creator.start_initial_nodes,
     };
 
     let expression = Expression { link_expression_range: (0.1, 0.5) };
 
-    let global_mutation_rate: f32 = 0.0;
-    let global_element_mutation: f32 = 0.0;
+    let global_mutation_rate: f32 = config.reproduction.global_mutation_rate;
+    let global_element_mutation: f32 = config.reproduction.global_element_mutation;
+
     let mut iteration: usize = 0;
 
     // create `generation 0`

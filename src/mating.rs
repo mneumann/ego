@@ -21,7 +21,7 @@ pub enum MatingMethod {
     CrossoverWeights,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Deserialize)]
 pub struct MatingMethodWeights {
     pub mutate_add_node: u32,
     pub mutate_drop_node: u32,
