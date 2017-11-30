@@ -41,9 +41,15 @@ mutate_symmetric_connect = 1
 mutate_weights = 100
 crossover_weights = 0
 
+
+[reproduction.weight_perturbance]
+method = "JiggleGaussian"
+sigma = 0.1
+
 # initial genome creator
 [creator]
 
 start_connected = false
 start_initial_nodes = 0
+
 

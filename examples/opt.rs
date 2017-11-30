@@ -66,6 +66,7 @@ struct ReproductionConfig {
     mating_method_weights: MatingMethodWeights,
     global_mutation_rate: f32,
     global_element_mutation: f32,
+    weight_perturbance: WeightPerturbanceMethod,
 }
 
 #[derive(Debug, Deserialize)]
@@ -102,7 +103,6 @@ fn main() {
 
     let selection = SelectNSGPMod { objective_eps: config.selection.objective_eps };
 
-    let weight_perturbance_sigma = 0.1;
     let link_weight_range = 1.0;
     let reproduction = Reproduction {
         mating_method_weights: config.reproduction.mating_method_weights,
@@ -117,9 +117,7 @@ fn main() {
             GeometricActivationFunction::Absolute,
         ],
         mutate_element_prob: Prob::new(0.05),
-        weight_perturbance: WeightPerturbanceMethod::JiggleGaussian {
-            sigma: weight_perturbance_sigma,
-        },
+        weight_perturbance: config.reproduction.weight_perturbance,
         link_weight_range: WeightRange::bipolar(link_weight_range),
         link_weight_creation_sigma: 0.1,
 

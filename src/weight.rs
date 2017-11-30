@@ -25,7 +25,7 @@ impl Into<f32> for Weight {
 
 /// Represents the range of a connection weight. The range is closed,
 /// i.e. including both endpoints [low, high].
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Deserialize)]
 pub struct WeightRange {
     high: f64,
     low: f64,
@@ -101,7 +101,8 @@ impl WeightRange {
 }
 
 /// Defines a perturbance method.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(tag = "method")]
 pub enum WeightPerturbanceMethod {
     JiggleUniform { range: WeightRange },
     JiggleGaussian { sigma: f64 },
