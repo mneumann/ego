@@ -67,6 +67,7 @@ struct ReproductionConfig {
     global_mutation_rate: f32,
     global_element_mutation: f32,
     weight_perturbance: WeightPerturbanceMethod,
+    activation_functions: Vec<GeometricActivationFunction>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -107,15 +108,7 @@ fn main() {
     let reproduction = Reproduction {
         mating_method_weights: config.reproduction.mating_method_weights,
 
-        activation_functions: vec![
-            GeometricActivationFunction::Linear,
-            GeometricActivationFunction::LinearClipped,
-            //GeometricActivationFunction::Gaussian,
-            GeometricActivationFunction::BipolarGaussian,
-            GeometricActivationFunction::BipolarSigmoid,
-            GeometricActivationFunction::Sine,
-            GeometricActivationFunction::Absolute,
-        ],
+        activation_functions: config.reproduction.activation_functions.clone(),
         mutate_element_prob: Prob::new(0.05),
         weight_perturbance: config.reproduction.weight_perturbance,
         link_weight_range: WeightRange::bipolar(link_weight_range),

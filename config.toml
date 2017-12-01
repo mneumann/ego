@@ -28,6 +28,9 @@ objective_eps = 0.01
 global_mutation_rate = 0.0
 global_element_mutation = 0.0
 
+# Gaussian
+activation_functions = ["Linear", "LinearClipped", "BipolarGaussian", "BipolarSigmoid", "Sine", "Absolute"]
+
 [reproduction.mating_method_weights]
 
 mutate_add_node = 2
