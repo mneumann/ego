@@ -68,12 +68,19 @@ struct ReproductionConfig {
     global_element_mutation: f32,
     weight_perturbance: WeightPerturbanceMethod,
     activation_functions: Vec<GeometricActivationFunction>,
+    mutate_element_prob: f32,
+    link_weight_creation_sigma: f64,
+    mutate_add_node_random_link_weight: bool,
+    mutate_drop_node_tournament_k: usize,
+    mutate_modify_node_tournament_k: usize,
+    mate_retries: usize,
 }
 
 #[derive(Debug, Deserialize)]
 struct CreatorConfig {
     start_connected: bool,
     start_initial_nodes: usize,
+    start_activation_functions: Vec<GeometricActivationFunction>,
 }
 
 fn main() {
@@ -109,26 +116,21 @@ fn main() {
         mating_method_weights: config.reproduction.mating_method_weights,
 
         activation_functions: config.reproduction.activation_functions.clone(),
-        mutate_element_prob: Prob::new(0.05),
+        mutate_element_prob: Prob::new(config.reproduction.mutate_element_prob),
         weight_perturbance: config.reproduction.weight_perturbance,
         link_weight_range: WeightRange::bipolar(link_weight_range),
-        link_weight_creation_sigma: 0.1,
+        link_weight_creation_sigma: config.reproduction.link_weight_creation_sigma,
 
-        mutate_add_node_random_link_weight: true,
-        mutate_drop_node_tournament_k: 2,
-        mutate_modify_node_tournament_k: 2,
-        mate_retries: 100,
+        mutate_add_node_random_link_weight: config.reproduction.mutate_add_node_random_link_weight,
+        mutate_drop_node_tournament_k: config.reproduction.mutate_drop_node_tournament_k,
+        mutate_modify_node_tournament_k: config.reproduction.mutate_modify_node_tournament_k,
+        mate_retries: config.reproduction.mate_retries,
     };
 
     let random_genome_creator = RandomGenomeCreator {
         link_weight_range: WeightRange::bipolar(link_weight_range),
 
-        start_activation_functions: vec![
-            //GeometricActivationFunction::Linear,
-            GeometricActivationFunction::BipolarGaussian,
-            GeometricActivationFunction::BipolarSigmoid,
-            GeometricActivationFunction::Sine,
-        ],
+        start_activation_functions: config.creator.start_activation_functions,
         start_connected: config.creator.start_connected,
         start_link_weight_range: WeightRange::bipolar(0.1),
         start_symmetry: vec![], // Some(3.0), None, Some(3.0)],
