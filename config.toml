@@ -19,6 +19,8 @@ edge_score = false
 iters = 50
 eps = 0.01
 
+link_expression_range = {start = 0.1, end = 0.5}
+
 [selection]
 
 objective_eps = 0.01
@@ -28,11 +30,13 @@ objective_eps = 0.01
 global_mutation_rate = 0.0
 global_element_mutation = 0.0
 mutate_element_prob = 0.05
+link_weight_range = { low = -1.0, high = 1.0 }
 link_weight_creation_sigma = 0.1
 mutate_add_node_random_link_weight = true
 mutate_drop_node_tournament_k = 2
 mutate_modify_node_tournament_k = 2
 mate_retries = 100
+
 
 # Gaussian
 activation_functions = ["Linear", "LinearClipped", "BipolarGaussian", "BipolarSigmoid", "Sine", "Absolute"]
@@ -54,6 +58,9 @@ crossover_weights = 0
 [reproduction.weight_perturbance]
 method = "JiggleGaussian"
 sigma = 0.1
+# method = "JiggleUniform"
+# range = { low = 0.1, high = 0.1 }
+
 
 # initial genome creator
 [creator]
@@ -61,5 +68,7 @@ sigma = 0.1
 start_connected = false
 start_initial_nodes = 0
 start_activation_functions = ["BipolarGaussian", "BipolarSigmoid", "Sine"]
-
-
+link_weight_range = { low = -1.0, high = 1.0 }
+start_link_weight_range = { low = -0.1, high = 0.1 }
+start_symmetry = []
+# start_symmetry = [{axis = 0, weight = 3.0}, {axis = 2, weight = 3.0}]

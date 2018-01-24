@@ -28,3 +28,4 @@ pub mod domain_graph;
 pub mod placement;
 pub mod export;
 pub mod fitness_graphsimilarity;
+pub mod range;

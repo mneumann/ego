@@ -2,7 +2,7 @@ use rand::{Closed01, Rng};
 use rand::distributions::{IndependentSample, Normal};
 
 /// Represents a connection weight.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Deserialize)]
 pub struct Weight(pub f64);
 
 impl Weight {

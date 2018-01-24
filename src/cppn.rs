@@ -16,6 +16,7 @@ use mating::{MatingMethod, MatingMethodWeights};
 use prob::Prob;
 use network_builder::NetworkBuilder;
 use std::marker::PhantomData;
+use range::RangeInclusive;
 
 pub type CppnGenome<AF>
 where
@@ -47,7 +48,7 @@ fn develop_cppn<P, AF, T, V>(
     cppn: &mut Cppn<CppnNode<AF>, Weight, ()>,
     substrate_config: &SubstrateConfiguration<P, T>,
     visitor: &mut V,
-    link_expression_range: (f64, f64),
+    link_expression_range: RangeInclusive<f64>,
 ) -> (Behavior, f64, Saturation)
 where
     P: Position,
@@ -133,8 +134,7 @@ where
         behavior.bv_link_expression.push(link_expression);
         behavior.bv_link_weight2.push(link_weight2);
 
-        if link_expression >= link_expression_range.0 && link_expression <= link_expression_range.1
-        {
+        if link_expression_range.contains(link_expression) {
             let distance_sq = source_node.position.distance_square(&target_node.position);
             debug_assert!(distance_sq >= 0.0);
             connection_cost += distance_sq;
@@ -156,7 +156,7 @@ where
     G: Sync,
 {
     /// express a link if leo is within [min, max]
-    pub link_expression_range: (f64, f64),
+    pub link_expression_range: RangeInclusive<f64>,
 
     pub substrate_configuration: SubstrateConfiguration<P, T>,
     pub domain_fitness: &'a DOMFIT,
@@ -226,11 +226,15 @@ where
     }
 
     fn population_metric(&self, population: &mut RatedPopulation<Self::GENOME, Self::FIT>) {
-        PopulationFitness.apply(
-            0, /* XXX */
-            population,
-        );
+        PopulationFitness.apply(0 /* XXX */, population);
     }
+}
+
+/// Create a gaussian seed node for the symmetry of `axis` with the given `weight`.
+#[derive(Copy, Clone, Debug, Deserialize)]
+pub struct StartSymmetry {
+    axis: usize,
+    weight: f64,
 }
 
 /// Creates a random individual for use by the start generation.
@@ -245,9 +249,9 @@ pub struct RandomGenomeCreator {
     pub start_link_weight_range: WeightRange,
 
     /// Create a gaussian seed node for the symmetry of d-th axis with the given weight
-    /// vec![Some(1.0), None, Some(2.0)] would for example create a node for symmetry of x-axis and
-    /// z-axis.
-    pub start_symmetry: Vec<Option<f64>>,
+    /// vec![StartSymmetry{axis: 0, 1.0}, StartSymmetry{axis: 2, 2.0}] would for example
+    /// create a node for symmetry of x-axis and z-axis, leaving out the y-axis.
+    pub start_symmetry: Vec<StartSymmetry>,
 
     /// Create `start_initial_nodes` random nodes for each genome. This can be useful,
     /// as we have a pretty low probability for adding a node.
@@ -309,18 +313,25 @@ impl RandomGenomeCreator {
         // the CPPN.
         genome.protect_nodes();
 
-        for d in 0..P::dims() {
-            if let &Some(w) = self.start_symmetry.get(d).unwrap_or(&None) {
-                let sym = genome.add_node(CppnNode::hidden(
-                    GeometricActivationFunction::BipolarGaussian,
-                ));
-                let inp1 = inputs[d * 2];
-                let inp2 = inputs[d * 2 + 1];
-                genome.add_link(inp1, sym, self.link_weight_range.clip_weight(Weight(-w)));
-                genome.add_link(inp2, sym, self.link_weight_range.clip_weight(Weight(w)));
-                // XXX: should we really connect the sym node as well?
-                inputs.push(sym);
-            }
+        for s in self.start_symmetry.iter() {
+            assert!(s.axis < P::dims());
+            let sym = genome.add_node(CppnNode::hidden(
+                GeometricActivationFunction::BipolarGaussian,
+            ));
+            let inp1 = inputs[s.axis * 2];
+            let inp2 = inputs[s.axis * 2 + 1];
+            genome.add_link(
+                inp1,
+                sym,
+                self.link_weight_range.clip_weight(Weight(-s.weight)),
+            );
+            genome.add_link(
+                inp2,
+                sym,
+                self.link_weight_range.clip_weight(Weight(s.weight)),
+            );
+            // XXX: should we really connect the sym node as well?
+            inputs.push(sym);
         }
 
         // Make sure that at least every input and every output is connected.
@@ -454,7 +465,7 @@ impl Reproduction {
 }
 
 pub struct Expression {
-    pub link_expression_range: (f64, f64),
+    pub link_expression_range: RangeInclusive<f64>,
 }
 
 impl Expression {

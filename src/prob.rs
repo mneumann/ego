@@ -1,6 +1,6 @@
 use rand::Rng;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Deserialize)]
 pub struct Prob(f32);
 
 impl Prob {

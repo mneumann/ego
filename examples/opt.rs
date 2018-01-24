@@ -9,7 +9,7 @@ extern crate toml;
 use ego::graph;
 use ego::domain_graph::GraphSimilarity;
 use ego::cppn::{Expression, GeometricActivationFunction, PopulationFitness, RandomGenomeCreator,
-                Reproduction};
+                Reproduction, StartSymmetry};
 use ego::mating::MatingMethodWeights;
 use ego::prob::Prob;
 use ego::weight::{WeightPerturbanceMethod, WeightRange};
@@ -20,6 +20,7 @@ use ego::fitness_graphsimilarity::fitness;
 use std::env;
 use std::fs::File;
 use std::io::Read;
+use ego::range::RangeInclusive;
 
 mod substrate_configuration;
 
@@ -54,6 +55,8 @@ struct FitnessConfig {
     iters: usize,
     ///
     eps: f32,
+    ///
+    link_expression_range: RangeInclusive<f64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -67,8 +70,9 @@ struct ReproductionConfig {
     global_mutation_rate: f32,
     global_element_mutation: f32,
     weight_perturbance: WeightPerturbanceMethod,
+    link_weight_range: WeightRange,
     activation_functions: Vec<GeometricActivationFunction>,
-    mutate_element_prob: f32,
+    mutate_element_prob: Prob,
     link_weight_creation_sigma: f64,
     mutate_add_node_random_link_weight: bool,
     mutate_drop_node_tournament_k: usize,
@@ -81,6 +85,9 @@ struct CreatorConfig {
     start_connected: bool,
     start_initial_nodes: usize,
     start_activation_functions: Vec<GeometricActivationFunction>,
+    link_weight_range: WeightRange,
+    start_link_weight_range: WeightRange,
+    start_symmetry: Vec<StartSymmetry>,
 }
 
 fn main() {
@@ -112,16 +119,13 @@ fn main() {
         objective_eps: config.selection.objective_eps,
     };
 
-    let link_weight_range = 1.0;
     let reproduction = Reproduction {
         mating_method_weights: config.reproduction.mating_method_weights,
-
         activation_functions: config.reproduction.activation_functions.clone(),
-        mutate_element_prob: Prob::new(config.reproduction.mutate_element_prob),
+        mutate_element_prob: config.reproduction.mutate_element_prob,
         weight_perturbance: config.reproduction.weight_perturbance,
-        link_weight_range: WeightRange::bipolar(link_weight_range),
+        link_weight_range: config.reproduction.link_weight_range,
         link_weight_creation_sigma: config.reproduction.link_weight_creation_sigma,
-
         mutate_add_node_random_link_weight: config.reproduction.mutate_add_node_random_link_weight,
         mutate_drop_node_tournament_k: config.reproduction.mutate_drop_node_tournament_k,
         mutate_modify_node_tournament_k: config.reproduction.mutate_modify_node_tournament_k,
@@ -129,17 +133,16 @@ fn main() {
     };
 
     let random_genome_creator = RandomGenomeCreator {
-        link_weight_range: WeightRange::bipolar(link_weight_range),
-
+        link_weight_range: config.creator.link_weight_range,
         start_activation_functions: config.creator.start_activation_functions,
         start_connected: config.creator.start_connected,
-        start_link_weight_range: WeightRange::bipolar(0.1),
-        start_symmetry: vec![], // Some(3.0), None, Some(3.0)],
+        start_link_weight_range: config.creator.start_link_weight_range,
+        start_symmetry: config.creator.start_symmetry,
         start_initial_nodes: config.creator.start_initial_nodes,
     };
 
     let expression = Expression {
-        link_expression_range: (0.1, 0.5),
+        link_expression_range: config.fitness.link_expression_range,
     };
 
     let global_mutation_rate: f32 = config.reproduction.global_mutation_rate;
