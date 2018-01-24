@@ -1,4 +1,4 @@
-use substrate::{Position, Node};
+use substrate::{Node, Position};
 
 pub mod gml;
 pub mod dot;

@@ -1,5 +1,5 @@
-use rand::{Rng, Closed01};
-use rand::distributions::{Normal, IndependentSample};
+use rand::{Closed01, Rng};
+use rand::distributions::{IndependentSample, Normal};
 
 /// Represents a connection weight.
 #[derive(Debug, Clone, Copy)]

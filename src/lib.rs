@@ -1,16 +1,16 @@
-extern crate cppn as cppn_ext;
 extern crate acyclic_network;
-extern crate nsga2;
-extern crate graph_neighbor_matching;
-extern crate rand;
-extern crate hamming;
-extern crate primal_bit;
-extern crate closed01;
 extern crate asexp;
+extern crate closed01;
+extern crate cppn as cppn_ext;
 extern crate graph_io_gml;
-extern crate petgraph;
+extern crate graph_neighbor_matching;
+extern crate hamming;
 #[macro_use]
 extern crate log;
+extern crate nsga2;
+extern crate petgraph;
+extern crate primal_bit;
+extern crate rand;
 #[macro_use]
 extern crate serde_derive;
 

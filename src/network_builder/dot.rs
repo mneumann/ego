@@ -1,6 +1,6 @@
 use network_builder::NetworkBuilder;
 use domain_graph::Neuron;
-use substrate::{Position, Node};
+use substrate::{Node, Position};
 use std::io::Write;
 use std::marker::PhantomData;
 
@@ -47,10 +47,7 @@ impl<'a, W: Write, P: Position> NetworkBuilder for DotNetworkBuilder<'a, W, P> {
         writeln!(
             wr,
             "  {}[label={},weight={:.1}{}];",
-            node.index,
-            node.index,
-            param,
-            rank
+            node.index, node.index, param, rank
         ).unwrap();
     }
 
@@ -68,10 +65,7 @@ impl<'a, W: Write, P: Position> NetworkBuilder for DotNetworkBuilder<'a, W, P> {
         writeln!(
             wr,
             "  {} -> {} [weight={:.2},color={}];",
-            source_node.index,
-            target_node.index,
-            w,
-            color
+            source_node.index, target_node.index, w, color
         ).unwrap();
     }
 

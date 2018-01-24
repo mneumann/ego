@@ -1,5 +1,5 @@
 use rand::Rng;
-use rand::distributions::{WeightedChoice, Weighted, IndependentSample};
+use rand::distributions::{IndependentSample, Weighted, WeightedChoice};
 
 #[derive(Debug, Clone, Copy)]
 pub enum MatingMethod {
@@ -61,7 +61,6 @@ impl MatingMethod {
                 weight: p.mutate_disconnect,
                 item: MatingMethod::MutateDisconnect,
             },
-
             Weighted {
                 weight: p.mutate_symmetric_join,
                 item: MatingMethod::MutateSymmetricJoin,
@@ -74,7 +73,6 @@ impl MatingMethod {
                 weight: p.mutate_symmetric_connect,
                 item: MatingMethod::MutateSymmetricConnect,
             },
-
             Weighted {
                 weight: p.mutate_weights,
                 item: MatingMethod::MutateWeights,

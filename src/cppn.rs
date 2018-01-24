@@ -3,22 +3,24 @@ use cppn_ext::cppn::CppnNode;
 pub use cppn_ext::cppn::CppnNodeKind;
 pub use cppn_ext::activation_function::ActivationFunction;
 pub use cppn_ext::activation_function::GeometricActivationFunction;
-use weight::{Weight, WeightRange, WeightPerturbanceMethod, gaussian};
+use weight::{gaussian, Weight, WeightPerturbanceMethod, WeightRange};
 use substrate::{Position, SubstrateConfiguration};
 use behavioral_bitvec::BehavioralBitvec;
 use genome::Genome;
 use nsga2::driver::Driver;
 use nsga2::population::RatedPopulation;
 use nsga2::selection::SelectNSGP;
-use fitness::{Behavior, Fitness, DomainFitness};
+use fitness::{Behavior, DomainFitness, Fitness};
 use rand::Rng;
 use mating::{MatingMethod, MatingMethodWeights};
 use prob::Prob;
 use network_builder::NetworkBuilder;
 use std::marker::PhantomData;
 
-pub type CppnGenome<AF> where
-    AF: ActivationFunction = Genome<CppnNode<AF>>;
+pub type CppnGenome<AF>
+where
+    AF: ActivationFunction,
+= Genome<CppnNode<AF>>;
 
 const CPPN_OUTPUT_LINK_WEIGHT1: usize = 0;
 const CPPN_OUTPUT_LINK_EXPRESSION: usize = 1;
@@ -131,8 +133,7 @@ where
         behavior.bv_link_expression.push(link_expression);
         behavior.bv_link_weight2.push(link_weight2);
 
-        if link_expression >= link_expression_range.0 &&
-            link_expression <= link_expression_range.1
+        if link_expression >= link_expression_range.0 && link_expression <= link_expression_range.1
         {
             let distance_sq = source_node.position.distance_square(&target_node.position);
             debug_assert!(distance_sq >= 0.0);
@@ -168,23 +169,25 @@ where
 /// XXX: Driver does not correctly set birth_iteration of offspring genomes!!!!
 /// XXX: wrong calculation of age_diversity
 impl<'a, DOMFIT, G, P, T, NETBUILDER> Driver for CppnDriver<'a, DOMFIT, G, P, T, NETBUILDER>
-    where DOMFIT: DomainFitness<G>,
-          G: Sync,
-          P: Position + Sync + 'a,
-          T: Sync + 'a,
-          NETBUILDER: NetworkBuilder<POS = P, NT = T, Output = G> + Sync
+where
+    DOMFIT: DomainFitness<G>,
+    G: Sync,
+    P: Position + Sync + 'a,
+    T: Sync + 'a,
+    NETBUILDER: NetworkBuilder<POS = P, NT = T, Output = G> + Sync,
 {
     type GENOME = CppnGenome<GeometricActivationFunction>;
     type FIT = Fitness;
     type SELECTION = SelectNSGP;
 
-/// Creates a random individual for use by the start generation.
-///
-/// We start from a minimal topology.
-/// If `self.start_connected` is `true`, we add some initial connections.
+    /// Creates a random individual for use by the start generation.
+    ///
+    /// We start from a minimal topology.
+    /// If `self.start_connected` is `true`, we add some initial connections.
 
     fn random_genome<R>(&self, rng: &mut R) -> Self::GENOME
-        where R: Rng
+    where
+        R: Rng,
     {
         self.random_genome_creator.create::<_, P>(0, rng)
     }
@@ -193,36 +196,40 @@ impl<'a, DOMFIT, G, P, T, NETBUILDER> Driver for CppnDriver<'a, DOMFIT, G, P, T,
         let mut cppn = Cppn::new(ind.network());
         let mut net_builder = NETBUILDER::new();
 
-        let (behavior, connection_cost, sat) = develop_cppn(&mut cppn,
-                                                            &self.substrate_configuration,
-                                                            &mut net_builder,
-                                                            self.link_expression_range);
+        let (behavior, connection_cost, sat) = develop_cppn(
+            &mut cppn,
+            &self.substrate_configuration,
+            &mut net_builder,
+            self.link_expression_range,
+        );
 
-// Evaluate domain specific fitness
+        // Evaluate domain specific fitness
         let domain_fitness = self.domain_fitness.fitness(net_builder.network());
 
         Fitness {
             domain_fitness: domain_fitness,
-behavioral_diversity: 0.0, // will be calculated in `population_metric`
+            behavioral_diversity: 0.0, // will be calculated in `population_metric`
             connection_cost: connection_cost,
             behavior: behavior,
-age_diversity: 0.0, // will be calculated in `population_metric`
+            age_diversity: 0.0, // will be calculated in `population_metric`
             saturation: sat.sum(),
             complexity: ind.complexity(),
         }
     }
 
     fn mate<R>(&self, rng: &mut R, parent1: &Self::GENOME, parent2: &Self::GENOME) -> Self::GENOME
-        where R: Rng
+    where
+        R: Rng,
     {
-// XXX set birth_iteration
-self.reproduction.mate(rng, parent1, parent2, 0 /* XXX */
-)
+        // XXX set birth_iteration
+        self.reproduction.mate(rng, parent1, parent2, 0 /* XXX */)
     }
 
     fn population_metric(&self, population: &mut RatedPopulation<Self::GENOME, Self::FIT>) {
-PopulationFitness.apply(0 /* XXX */
-, population);
+        PopulationFitness.apply(
+            0, /* XXX */
+            population,
+        );
     }
 }
 
@@ -407,20 +414,16 @@ impl Reproduction {
                     )
                 }
                 MatingMethod::MutateConnect => {
-                    let link_weight = self.link_weight_range.clip_weight(Weight(gaussian(
-                        self.link_weight_creation_sigma,
-                        rng,
-                    )));
+                    let link_weight = self.link_weight_range
+                        .clip_weight(Weight(gaussian(self.link_weight_creation_sigma, rng)));
                     offspring.mutate_connect(link_weight, rng)
                 }
                 MatingMethod::MutateDisconnect => offspring.mutate_disconnect(rng),
                 MatingMethod::MutateSymmetricJoin => offspring.mutate_symmetric_join(rng),
                 MatingMethod::MutateSymmetricFork => offspring.mutate_symmetric_fork(rng),
                 MatingMethod::MutateSymmetricConnect => {
-                    let link_weight = self.link_weight_range.clip_weight(Weight(gaussian(
-                        self.link_weight_creation_sigma,
-                        rng,
-                    )));
+                    let link_weight = self.link_weight_range
+                        .clip_weight(Weight(gaussian(self.link_weight_creation_sigma, rng)));
                     offspring.mutate_symmetric_connect(link_weight, 5 /* XXX */, rng)
                 }
 
@@ -495,18 +498,16 @@ impl PopulationFitness {
 
             // XXX: parallelize this loop
             for j in i + 1..n {
-                let distance = population.fitness(i).behavior.weighted_distance(
-                    &population
-                        .fitness(j)
-                        .behavior,
-                );
+                let distance = population
+                    .fitness(i)
+                    .behavior
+                    .weighted_distance(&population.fitness(j).behavior);
                 diversity_i += distance;
                 population.fitness_mut(j).behavioral_diversity += distance;
             }
 
             population.fitness_mut(i).behavioral_diversity = diversity_i;
         }
-
 
         // Calculate age diversity
 

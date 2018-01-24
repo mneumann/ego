@@ -1,5 +1,5 @@
-use acyclic_network::{Network, NodeType, NodeIndex};
-use weight::{Weight, WeightRange, WeightPerturbanceMethod};
+use acyclic_network::{Network, NodeIndex, NodeType};
+use weight::{Weight, WeightPerturbanceMethod, WeightRange};
 use prob::Prob;
 use rand::Rng;
 
@@ -56,7 +56,6 @@ impl<NT: NodeType> Genome<NT> {
         self.protected_nodes
     }
 
-
     /// Returns a reference to the feed forward network.
 
     pub fn network(&self) -> &Network<NT, Weight, ()> {
@@ -81,12 +80,8 @@ impl<NT: NodeType> Genome<NT> {
         debug_assert!(!self.network.link_would_cycle(source_node, target_node));
         debug_assert!(self.network.valid_link(source_node, target_node).is_ok());
 
-        let _link_index = self.network.add_link_unordered(
-            source_node,
-            target_node,
-            weight,
-            (),
-        );
+        let _link_index = self.network
+            .add_link_unordered(source_node, target_node, weight, ());
     }
 
     pub fn add_node(&mut self, node_type: NT) -> NodeIndex {
@@ -133,11 +128,7 @@ impl<NT: NodeType> Genome<NT> {
         if n <= self.protected_nodes {
             return None;
         }
-        Some(self.random_mindeg_node(
-            tournament_k,
-            self.protected_nodes,
-            rng,
-        ))
+        Some(self.random_mindeg_node(tournament_k, self.protected_nodes, rng))
     }
 
     /// Structural Mutation `AddNode`.
@@ -288,9 +279,9 @@ impl<NT: NodeType> Genome<NT> {
         for i in 0..self.network.node_count() {
             let node_idx = NodeIndex::new(i);
             if node_idx != source_node && node_idx != target_node {
-                if self.network.valid_link(node_idx, target_node).is_ok() &&
-                    !self.network.has_link(node_idx, target_node) &&
-                    !self.network.link_would_cycle(node_idx, target_node)
+                if self.network.valid_link(node_idx, target_node).is_ok()
+                    && !self.network.has_link(node_idx, target_node)
+                    && !self.network.link_would_cycle(node_idx, target_node)
                 {
                     self.add_link(node_idx, target_node, weight.inv());
                     return true;
@@ -329,9 +320,9 @@ impl<NT: NodeType> Genome<NT> {
         for i in 0..self.network.node_count() {
             let node_idx = NodeIndex::new(i);
             if node_idx != source_node && node_idx != target_node {
-                if self.network.valid_link(source_node, node_idx).is_ok() &&
-                    !self.network.has_link(source_node, node_idx) &&
-                    !self.network.link_would_cycle(source_node, node_idx)
+                if self.network.valid_link(source_node, node_idx).is_ok()
+                    && !self.network.has_link(source_node, node_idx)
+                    && !self.network.link_would_cycle(source_node, node_idx)
                 {
                     self.add_link(source_node, node_idx, weight.inv());
                     return true;
@@ -341,7 +332,6 @@ impl<NT: NodeType> Genome<NT> {
 
         return false;
     }
-
 
     /// Structural Mutation `Symmetric Connect`.
     ///
@@ -367,12 +357,12 @@ impl<NT: NodeType> Genome<NT> {
 
                 for _ in 0..retries {
                     let node3 = self.random_mindeg_node(3, 0, rng);
-                    if self.network.valid_link(node1, node3).is_ok() &&
-                        self.network.valid_link(node2, node3).is_ok() &&
-                        !self.network.has_link(node1, node3) &&
-                        !self.network.has_link(node2, node3) &&
-                        !self.network.link_would_cycle(node1, node3) &&
-                        !self.network.link_would_cycle(node2, node3)
+                    if self.network.valid_link(node1, node3).is_ok()
+                        && self.network.valid_link(node2, node3).is_ok()
+                        && !self.network.has_link(node1, node3)
+                        && !self.network.has_link(node2, node3)
+                        && !self.network.link_would_cycle(node1, node3)
+                        && !self.network.link_would_cycle(node2, node3)
                     {
                         self.add_link(node1, node3, link_weight);
                         self.add_link(node2, node3, link_weight.inv());
@@ -384,7 +374,6 @@ impl<NT: NodeType> Genome<NT> {
         }
         return false;
     }
-
 
     /// Structural Mutation `Disconnect`.
     ///
@@ -405,7 +394,6 @@ impl<NT: NodeType> Genome<NT> {
         }
     }
 
-
     /// Uniformly modify the weight of links, each with a probability of `mutate_element_prob`. It
     /// the genome contains at least one link, it is guaranteed that this method makes a modification.
     ///
@@ -423,13 +411,13 @@ impl<NT: NodeType> Genome<NT> {
     {
         let mut modifications = 0;
 
-        self.network.each_link_mut(
-            |link| if mutate_element_prob.flip(rng) {
+        self.network.each_link_mut(|link| {
+            if mutate_element_prob.flip(rng) {
                 let new_weight = weight_perturbance.perturb(link.weight(), link_weight_range, rng);
                 link.set_weight(new_weight);
                 modifications += 1;
-            },
-        );
+            }
+        });
 
         if modifications == 0 {
             // Make at least one change to a randomly selected link.

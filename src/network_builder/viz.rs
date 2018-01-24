@@ -1,6 +1,6 @@
 use network_builder::NetworkBuilder;
 use domain_graph::Neuron;
-use substrate::{Position3d, Node};
+use substrate::{Node, Position3d};
 
 // For vizualizing a network (e.g. converting into a 3d mesh)
 pub struct VizNetworkBuilder<T> {

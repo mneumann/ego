@@ -1,5 +1,5 @@
 use ego::domain_graph::{Neuron, NodeCount};
-use ego::substrate::{NodeSet, Substrate, SubstrateConfiguration, Position3d};
+use ego::substrate::{NodeSet, Position3d, Substrate, SubstrateConfiguration};
 use ego::placement::DistributeInterval;
 
 pub fn substrate_configuration(
@@ -14,13 +14,12 @@ pub fn substrate_configuration(
     let nodeset_links = &[
         (input_nodeset, hidden_nodeset),
         (hidden_nodeset, output_nodeset),
-        (input_nodeset, output_nodeset) /* (output_nodeset, input_nodeset) */,
+        (input_nodeset, output_nodeset), /* (output_nodeset, input_nodeset) */
     ];
 
     // let nodeset_links = &[(input_nodeset, hidden_nodeset), (hidden_nodeset, output_nodeset),
     // (output_nodeset, input_nodeset)
     // ];
-
 
     // Input layer
     {
@@ -31,8 +30,7 @@ pub fn substrate_configuration(
             node_count.inputs,
             -1.0 * node_count.inputs as f64,
             1.0 * node_count.inputs as f64,
-        )
-        {
+        ) {
             // for x in DistributeInterval::new(node_count.inputs, -1.0, 1.0) {
             let y = 0.0; //0.1 * (1.0 - x.powi(8));
             substrate.add_node(Position3d::new(x, y, z), Neuron::Input, input_nodeset);
@@ -47,8 +45,7 @@ pub fn substrate_configuration(
             node_count.hidden,
             -1.0 * node_count.hidden as f64,
             1.0 * node_count.hidden as f64,
-        )
-        {
+        ) {
             // for x in DistributeInterval::new(node_count.hidden, -1.0, 1.0) {
             // let y = (1.0 - x.powi(8));
             let y = 0.0; //-1.0;
@@ -66,8 +63,7 @@ pub fn substrate_configuration(
             node_count.outputs,
             -1.0 * node_count.outputs as f64,
             1.0 * node_count.outputs as f64,
-        )
-        {
+        ) {
             // for x in DistributeInterval::new(node_count.outputs, -1.0, 1.0) {
             // let y = -0.1 * (1.0 - x.powi(8));
             let y = 0.0;

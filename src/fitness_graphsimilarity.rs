@@ -2,9 +2,9 @@
 
 use cppn::{Expression, G};
 use network_builder::NetworkBuilder;
-use domain_graph::{Neuron, NeuronNetworkBuilder, GraphSimilarity};
-use substrate::{SubstrateConfiguration, Position};
-use fitness::{Fitness, DomainFitness};
+use domain_graph::{GraphSimilarity, Neuron, NeuronNetworkBuilder};
+use substrate::{Position, SubstrateConfiguration};
+use fitness::{DomainFitness, Fitness};
 
 pub fn fitness<P>(
     genome: &G,
@@ -15,7 +15,6 @@ pub fn fitness<P>(
 where
     P: Position,
 {
-
     let mut network_builder = NeuronNetworkBuilder::new();
     let (behavior, connection_cost, sat) =
         expression.express(genome, &mut network_builder, substrate_config);

@@ -3,10 +3,10 @@
 use closed01::Closed01;
 use graph_neighbor_matching::graph::{GraphBuilder, OwnedGraph};
 use std::marker::PhantomData;
-use substrate::{Position, Node};
+use substrate::{Node, Position};
 use network_builder::NetworkBuilder;
 use fitness::DomainFitness;
-use graph_neighbor_matching::{SimilarityMatrix, ScoreNorm, WeightedNodeColors};
+use graph_neighbor_matching::{ScoreNorm, SimilarityMatrix, WeightedNodeColors};
 use graph::NodeLabel;
 use graph_neighbor_matching::NodeColorWeight;
 use std::str::FromStr;
@@ -90,7 +90,6 @@ impl NodeCount {
     }
 }
 
-
 pub struct NeuronNetworkBuilder<P>
 where
     P: Position,
@@ -129,7 +128,6 @@ impl<P: Position> NetworkBuilder for NeuronNetworkBuilder<P> {
             target_node.index,
             Closed01::new(w as f32),
         );
-
     }
     fn network(self) -> Self::Output {
         self.builder.graph()
@@ -159,8 +157,8 @@ impl DomainFitness<OwnedGraph<Neuron>> for GraphSimilarity {
         let score = s.score_optimal_sum_norm(Some(&assignment), ScoreNorm::MaxDegree)
             .get() as f64;
         if self.edge_score {
-            score *
-                s.score_outgoing_edge_weights_sum_norm(&assignment, ScoreNorm::MaxDegree)
+            score
+                * s.score_outgoing_edge_weights_sum_norm(&assignment, ScoreNorm::MaxDegree)
                     .get() as f64
         } else {
             score

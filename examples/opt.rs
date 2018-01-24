@@ -1,15 +1,15 @@
 extern crate ego;
 extern crate nsga2;
 extern crate rand;
-extern crate time;
-extern crate toml;
 #[macro_use]
 extern crate serde_derive;
+extern crate time;
+extern crate toml;
 
 use ego::graph;
 use ego::domain_graph::GraphSimilarity;
-use ego::cppn::{GeometricActivationFunction, RandomGenomeCreator, Reproduction, Expression,
-                PopulationFitness};
+use ego::cppn::{Expression, GeometricActivationFunction, PopulationFitness, RandomGenomeCreator,
+                Reproduction};
 use ego::mating::MatingMethodWeights;
 use ego::prob::Prob;
 use ego::weight::{WeightPerturbanceMethod, WeightRange};
@@ -91,9 +91,8 @@ fn main() {
 
     let mut file = File::open(config_file).expect("Unable to open config file");
     let mut contents = String::new();
-    file.read_to_string(&mut contents).expect(
-        "Unable to read file",
-    );
+    file.read_to_string(&mut contents)
+        .expect("Unable to read file");
 
     let config: Config = toml::from_str(&contents).unwrap();
 
@@ -109,7 +108,9 @@ fn main() {
 
     let substrate_config = substrate_configuration::substrate_configuration(&node_count);
 
-    let selection = SelectNSGPMod { objective_eps: config.selection.objective_eps };
+    let selection = SelectNSGPMod {
+        objective_eps: config.selection.objective_eps,
+    };
 
     let link_weight_range = 1.0;
     let reproduction = Reproduction {
@@ -137,7 +138,9 @@ fn main() {
         start_initial_nodes: config.creator.start_initial_nodes,
     };
 
-    let expression = Expression { link_expression_range: (0.1, 0.5) };
+    let expression = Expression {
+        link_expression_range: (0.1, 0.5),
+    };
 
     let global_mutation_rate: f32 = config.reproduction.global_mutation_rate;
     let global_element_mutation: f32 = config.reproduction.global_element_mutation;
@@ -177,7 +180,6 @@ fn main() {
     let max_iterations = 100;
 
     loop {
-
         if iteration >= max_iterations {
             break;
         }
@@ -223,7 +225,6 @@ fn main() {
         PopulationFitness.apply(iteration, &mut next_gen);
         parents = next_gen.select(config.evo.mu, &config.evo.objectives, &selection, &mut rng);
 
-
         best_individual_i = 0;
         best_fitness = parents.individuals()[best_individual_i]
             .fitness()
@@ -241,10 +242,7 @@ fn main() {
         let total_ns = time_after - time_before;
         println!(
             "{}\t{}\t{}\t{}",
-            iteration,
-            total_ns,
-            best_individual_i,
-            best_fitness
+            iteration, total_ns, best_individual_i, best_fitness
         );
     }
 }

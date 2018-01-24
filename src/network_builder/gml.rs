@@ -1,6 +1,6 @@
 use network_builder::NetworkBuilder;
 use domain_graph::Neuron;
-use substrate::{Position, Node};
+use substrate::{Node, Position};
 use std::io::Write;
 use std::marker::PhantomData;
 
@@ -54,9 +54,7 @@ impl<'a, W: Write, P: Position> NetworkBuilder for GMLNetworkBuilder<'a, W, P> {
         writeln!(
             wr,
             "  edge [source {} target {} weight {:.1}]",
-            source_node.index,
-            target_node.index,
-            w
+            source_node.index, target_node.index, w
         ).unwrap();
     }
 

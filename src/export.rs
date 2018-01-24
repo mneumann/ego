@@ -1,6 +1,6 @@
 use domain_graph::Neuron;
-use substrate::{SubstrateConfiguration, Position};
-use cppn::{CppnNodeKind, Expression, G, ActivationFunction};
+use substrate::{Position, SubstrateConfiguration};
+use cppn::{ActivationFunction, CppnNodeKind, Expression, G};
 use network_builder::NetworkBuilder;
 use network_builder::gml::GMLNetworkBuilder;
 use network_builder::dot::DotNetworkBuilder;
@@ -94,16 +94,14 @@ node [fontname = Helvetica];
                 };
                 format!(
                     "shape=doublecircle,label={},rank=max,style=filled,\
-                                             fillcolor=yellow,color=grey",
+                     fillcolor=yellow,color=grey",
                     label
                 )
             }
-            CppnNodeKind::Hidden => {
-                format!(
-                    "shape=box,label={}",
-                    node.node_type().activation_function.name()
-                )
-            }
+            CppnNodeKind::Hidden => format!(
+                "shape=box,label={}",
+                node.node_type().activation_function.name()
+            ),
         };
         writeln!(&mut file, "{} [{}];", node_idx.index(), s).unwrap();
     });

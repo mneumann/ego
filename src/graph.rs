@@ -71,9 +71,10 @@ where
         &convert_weight,
     ).unwrap();
     let edge_range = determine_edge_value_range(&graph);
-    let graph = graph.map(|_, nw| nw.clone(), |_, &ew| {
-        normalize_to_closed01(ew, edge_range)
-    });
+    let graph = graph.map(
+        |_, nw| nw.clone(),
+        |_, &ew| normalize_to_closed01(ew, edge_range),
+    );
 
     OwnedGraph::from_petgraph(&graph)
 }

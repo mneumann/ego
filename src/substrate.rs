@@ -1,4 +1,4 @@
-pub use cppn_ext::position::{Position, Position3d, Position2d};
+pub use cppn_ext::position::{Position, Position2d, Position3d};
 
 /// Represents a logical node set. Each node set is represented by a bit,
 /// up to 64 node sets are supported. A node can be part of up to 64
@@ -48,7 +48,6 @@ fn test_nodeset() {
         NodeSet::single(1).has_intersection(&NodeSet::single(2))
     );
 }
-
 
 /// Represents a node in the substrate. `T` stores additional information about that node.
 #[derive(Clone, Debug)]
@@ -112,7 +111,6 @@ where
         // Connect all nodes belonging to NodeSet `src_ns` with those that belong to `tgt_ns`.
         for &(ref src_ns, ref tgt_ns) in connect_node_sets.iter() {
             for (source_idx, source) in self.nodes.iter().enumerate() {
-
                 // Reject invalid connections.
                 if source.in_nodeset(src_ns) {
                     for (target_idx, target) in self.nodes.iter().enumerate() {
