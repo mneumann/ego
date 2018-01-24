@@ -47,7 +47,7 @@ struct EvoConfig {
 #[derive(Debug, Deserialize)]
 struct FitnessConfig {
     /// Path to the target graph to approximate
-    target_graph: String,
+    target_graph_path: String,
     ///
     edge_score: bool,
     /// Number of iterations used by the similarity algorithm
@@ -97,7 +97,7 @@ fn main() {
     let config: Config = toml::from_str(&contents).unwrap();
 
     let domain_fitness_eval = GraphSimilarity {
-        target_graph: graph::load_graph_normalized(&config.fitness.target_graph),
+        target_graph: graph::load_graph_normalized(&config.fitness.target_graph_path),
         edge_score: config.fitness.edge_score,
         iters: config.fitness.iters,
         eps: config.fitness.eps,

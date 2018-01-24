@@ -14,7 +14,7 @@ objectives = [0, 1, 2, 3, 4, 5]
 
 [fitness]
 
-target_graph = "nets/jeffress_2_3_weights.gml"
+target_graph_path = "nets/jeffress_2_3_weights.gml"
 edge_score = false
 iters = 50
 eps = 0.01
