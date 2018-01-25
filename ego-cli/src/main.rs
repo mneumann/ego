@@ -21,8 +21,7 @@ use std::env;
 use std::fs::File;
 use std::io::Read;
 use ego::range::RangeInclusive;
-
-mod substrate_configuration;
+use ego::substrate_configuration;
 
 #[derive(Debug, Deserialize)]
 struct Config {
