@@ -27,3 +27,4 @@ pub mod placement;
 pub mod export;
 pub mod fitness_graphsimilarity;
 pub mod range;
+pub mod substrate_configuration;
