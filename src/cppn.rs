@@ -243,6 +243,7 @@ pub struct StartSymmetry {
 ///
 /// We start from a minimal topology.
 /// If `self.start_connected` is `true`, we add some initial connections.
+#[derive(Clone, Debug, Deserialize)]
 pub struct RandomGenomeCreator {
     /// Create genomes which are already connected
     pub start_connected: bool,
@@ -375,6 +376,7 @@ impl RandomGenomeCreator {
     }
 }
 
+#[derive(Clone, Debug, Deserialize)]
 pub struct Reproduction {
     pub mate_retries: usize,
     pub mating_method_weights: MatingMethodWeights,
@@ -386,6 +388,8 @@ pub struct Reproduction {
     pub link_weight_creation_sigma: f64,
     pub activation_functions: Vec<GeometricActivationFunction>,
     pub weight_perturbance: WeightPerturbanceMethod,
+    pub global_mutation_rate: Prob,
+    pub global_element_mutation: Prob,
 }
 
 impl Reproduction {
