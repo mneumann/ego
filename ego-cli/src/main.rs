@@ -89,18 +89,8 @@ struct CreatorConfig {
     start_symmetry: Vec<StartSymmetry>,
 }
 
-fn main() {
+fn run_with_config(config: Config) {
     let mut rng = rand::thread_rng();
-
-    let config_file = env::args().nth(1).expect("config file");
-    println!("config file: {}", config_file);
-
-    let mut file = File::open(config_file).expect("Unable to open config file");
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)
-        .expect("Unable to read file");
-
-    let config: Config = serde_json::from_str(&contents).unwrap();
 
     let domain_fitness_eval = GraphSimilarity {
         target_graph: graph::load_graph_normalized(&config.fitness.target_graph),
@@ -247,4 +237,18 @@ fn main() {
             iteration, total_ns, best_individual_i, best_fitness
         );
     }
+}
+
+fn main() {
+    let config_file = env::args().nth(1).expect("config file");
+    println!("config file: {}", config_file);
+
+    let mut file = File::open(config_file).expect("Unable to open config file");
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)
+        .expect("Unable to read file");
+
+    let config: Config = serde_json::from_str(&contents).unwrap();
+
+    run_with_config(config);
 }
