@@ -11,10 +11,10 @@ include = ["src/*.rs", "examples/*.rs", "examples/*.rs", "Cargo.toml", "LICENSE"
 
 [dependencies]
 
-rand = "0.3"
-log = "0.3"
-cppn = { version = "0.2", features = ["serde"] }
-acyclic-network = "0.1"
+rand = "0.4"
+log = "0.4"
+cppn = { version = "0.3", features = ["serde"] }
+acyclic-network = "0.2"
 graph-neighbor-matching = "0.7"
 nsga2 = {git = "https://github.com/mneumann/nsga2-rs"}
 hamming = "0.1"
