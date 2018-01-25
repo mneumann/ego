@@ -1,0 +1,57 @@
+{
+    "evo": {
+	"mu": 100,
+	"lambda": 100,
+	"k": 2,
+	"objectives": [0, 1, 2, 3, 4, 5]
+    },
+
+    "fitness": {
+	"target_graph_path": "nets/jeffress_2_3_weights.gml",
+	"edge_score": false,
+	"iters": 50,
+	"eps": 0.01,
+	"link_expression_range": {"start": 0.1, "end": 0.5}
+    },
+
+    "selection": {
+	"objective_eps": 0.01
+    },
+
+    "reproduction": {
+	"global_mutation_rate": 0.0,
+	"global_element_mutation": 0.0,
+	"mutate_element_prob": 0.05,
+	"link_weight_range": { "low": -1.0, "high": 1.0 },
+	"link_weight_creation_sigma": 0.1,
+	"mutate_add_node_random_link_weight": true,
+	"mutate_drop_node_tournament_k": 2,
+	"mutate_modify_node_tournament_k": 2,
+	"mate_retries": 100,
+	"activation_functions": ["Linear", "LinearClipped", "BipolarGaussian", "BipolarSigmoid", "Sine", "Absolute"],
+	"mating_method_weights": {
+	    "mutate_add_node": 2,
+	    "mutate_drop_node": 1,
+	    "mutate_modify_node": 0,
+	    "mutate_connect": 2,
+	    "mutate_disconnect": 2,
+	    "mutate_symmetric_join": 2,
+	    "mutate_symmetric_fork": 2,
+	    "mutate_symmetric_connect": 1,
+	    "mutate_weights": 100,
+	    "crossover_weights": 0
+	},
+	"weight_perturbance": {
+		"method": "JiggleGaussian",
+		"sigma": 0.1
+	}
+    },
+    "creator": {
+	"start_connected": false,
+	"start_initial_nodes": 0,
+	"start_activation_functions": ["BipolarGaussian", "BipolarSigmoid", "Sine"],
+	"link_weight_range": { "low": -1.0, "high": 1.0 },
+	"start_link_weight_range": { "low": -0.1, "high": 0.1 },
+	"start_symmetry": []
+    }
+}

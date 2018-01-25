@@ -3,6 +3,7 @@ extern crate nsga2;
 extern crate rand;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_json;
 extern crate time;
 extern crate toml;
 
@@ -101,7 +102,7 @@ fn main() {
     file.read_to_string(&mut contents)
         .expect("Unable to read file");
 
-    let config: Config = toml::from_str(&contents).unwrap();
+    let config: Config = serde_json::from_str(&contents).unwrap();
 
     let domain_fitness_eval = GraphSimilarity {
         target_graph: graph::load_graph_normalized(&config.fitness.target_graph_path),

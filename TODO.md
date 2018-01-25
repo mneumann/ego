@@ -1,3 +1,4 @@
+- [x] Read configuration from JSON file
 - [ ] Composition of activation functions. Can we generate any mathematical function?
 - [ ] Do we have enough randomness?
 - [ ] Choose a higher mutation rate for individuals which have a worse fitness than
