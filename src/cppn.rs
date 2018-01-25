@@ -75,8 +75,10 @@ where
     // First visit all nodes
 
     for node in nodes.iter() {
-        let inputs = [node.position.coords(), null_position.coords()];
-        cppn.process(&inputs[..]);
+        // I would love to pass in a &[f64] instead of a &[&[f64]], but with the current version of
+        // Rust, you cannot use associated constants in positions where a constant is expected
+        // (e.g. here: [f64; P::DIMS]).
+        cppn.process(&[node.position.coords(), null_position.coords()]);
 
         // let link_weight1 = cppn.read_output(CPPN_OUTPUT_LINK_WEIGHT1).unwrap();
         // let link_expression = cppn.read_output(CPPN_OUTPUT_LINK_EXPRESSION).unwrap();
