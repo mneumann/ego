@@ -1,15 +1,36 @@
 use graph_neighbor_matching::graph::OwnedGraph;
-use std::fs::File;
-use std::io::Read;
 use std::str::FromStr;
-use graph_io_gml::parse_gml;
 use std::f32::{INFINITY, NEG_INFINITY};
 use closed01::Closed01;
-//use std::io::{self, Write};
-use asexp::Sexp;
 use petgraph::Directed;
-use petgraph::Graph as PetGraph;
+use petgraph::Graph;
+use petgraph::graph::NodeIndex;
+use std::collections::BTreeMap;
 use std::fmt::Debug;
+
+/// Similar to GML, but encoded in JSON.
+#[derive(Debug, Deserialize)]
+pub struct JsonGML {
+    directed: bool,
+    name: String,
+    description: Option<String>,
+    nodes: Vec<JsonGMLNode>,
+    edges: Vec<JsonGMLEdge>,
+}
+
+#[derive(Debug, Deserialize)]
+struct JsonGMLNode {
+    id: usize,
+    label: Option<String>,
+    weight: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct JsonGMLEdge {
+    source: usize,
+    target: usize,
+    weight: Option<f32>,
+}
 
 /// Trait used for dot generation
 
@@ -22,17 +43,7 @@ pub trait NodeLabel {
     }
 }
 
-fn convert_weight(w: Option<&Sexp>) -> Option<f32> {
-    match w {
-        Some(s) => s.get_float().map(|f| f as f32),
-        None => {
-            // use a default
-            Some(0.0)
-        }
-    }
-}
-
-fn determine_edge_value_range<T>(g: &PetGraph<T, f32, Directed>) -> (f32, f32) {
+fn determine_edge_value_range<T>(g: &Graph<T, f32, Directed>) -> (f32, f32) {
     let mut w_min = INFINITY;
     let mut w_max = NEG_INFINITY;
     for i in g.raw_edges() {
@@ -52,24 +63,31 @@ fn normalize_to_closed01(w: f32, range: (f32, f32)) -> Closed01<f32> {
     }
 }
 
-pub fn load_graph_normalized<N>(graph_file: &str) -> OwnedGraph<N>
+pub fn load_graph_normalized<N>(json_graph: &JsonGML) -> OwnedGraph<N>
 where
     N: Clone + Debug + FromStr<Err = &'static str>,
 {
-    let graph_s = {
-        let mut graph_file = File::open(graph_file).unwrap();
-        let mut graph_s = String::new();
-        let _ = graph_file.read_to_string(&mut graph_s).unwrap();
-        graph_s
-    };
+    // We only support directed graphs
+    assert!(json_graph.directed);
 
-    let graph = parse_gml(
-        &graph_s,
-        &|node_sexp| -> Option<N> {
-            node_sexp.and_then(|se| se.get_str().map(|s| N::from_str(s).unwrap()))
-        },
-        &convert_weight,
-    ).unwrap();
+    let mut node_map: BTreeMap<usize, NodeIndex> = BTreeMap::new();
+    let mut graph = Graph::new();
+
+    for node in json_graph.nodes.iter() {
+        let idx = graph.add_node(N::from_str(&node.weight).unwrap());
+        if let Some(_) = node_map.insert(node.id, idx) {
+            panic!("duplicate node id");
+        }
+    }
+
+    for edge in json_graph.edges.iter() {
+        graph.add_edge(
+            node_map[&edge.source],
+            node_map[&edge.target],
+            edge.weight.unwrap_or(0.0),
+        );
+    }
+
     let edge_range = determine_edge_value_range(&graph);
     let graph = graph.map(
         |_, nw| nw.clone(),

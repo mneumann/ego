@@ -5,9 +5,8 @@ extern crate rand;
 extern crate serde_derive;
 extern crate serde_json;
 extern crate time;
-extern crate toml;
 
-use ego::graph;
+use ego::graph::{self, JsonGML};
 use ego::domain_graph::GraphSimilarity;
 use ego::cppn::{Expression, GeometricActivationFunction, PopulationFitness, RandomGenomeCreator,
                 Reproduction, StartSymmetry};
@@ -48,8 +47,8 @@ struct EvoConfig {
 
 #[derive(Debug, Deserialize)]
 struct FitnessConfig {
-    /// Path to the target graph to approximate
-    target_graph_path: String,
+    /// The target graph to approximate
+    target_graph: JsonGML,
     ///
     edge_score: bool,
     /// Number of iterations used by the similarity algorithm
@@ -105,7 +104,7 @@ fn main() {
     let config: Config = serde_json::from_str(&contents).unwrap();
 
     let domain_fitness_eval = GraphSimilarity {
-        target_graph: graph::load_graph_normalized(&config.fitness.target_graph_path),
+        target_graph: graph::load_graph_normalized(&config.fitness.target_graph),
         edge_score: config.fitness.edge_score,
         iters: config.fitness.iters,
         eps: config.fitness.eps,

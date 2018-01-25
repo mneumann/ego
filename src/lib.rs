@@ -1,8 +1,6 @@
 extern crate acyclic_network;
-extern crate asexp;
 extern crate closed01;
 extern crate cppn as cppn_ext;
-extern crate graph_io_gml;
 extern crate graph_neighbor_matching;
 extern crate hamming;
 #[macro_use]
