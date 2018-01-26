@@ -67,7 +67,7 @@ pub struct Simulation<R: Rng> {
     population: RankedPopulation<G, Fitness>,
     rng: Box<R>,
     /// how long did it take to reproduce/create and rank the current population
-    current_population_ns: u64,
+    pub current_population_ns: u64,
     /// total simulation duration
     total_ns: u64,
 }
