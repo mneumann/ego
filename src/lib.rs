@@ -11,6 +11,7 @@ extern crate primal_bit;
 extern crate rand;
 #[macro_use]
 extern crate serde_derive;
+extern crate time;
 
 pub mod genome;
 pub mod weight;
@@ -28,3 +29,4 @@ pub mod export;
 pub mod fitness_graphsimilarity;
 pub mod range;
 pub mod substrate_configuration;
+pub mod driver;
